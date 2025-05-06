@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esercizi QI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      padding: 40px;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      width: 80%;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PRIMA CARD: Percentuale inferiore o superiore -->
+  <div class="card">
+    <h2>Esercizio: Distribuzione Normale del QI</h2>
+    <p>
+      Il QI in una popolazione è distribuito normalmente con<br>
+      <strong>media μ = <span id="media1"></span></strong> e 
+      <strong>deviazione standard σ = <span id="deviazione1"></span></strong>.<br>
+      Un individuo ha un QI di <strong><span id="qi1"></span></strong>.<br>
+      Qual è la percentuale della popolazione che ha un QI <strong><span id="direzione1"></span></strong> a questo valore?
+    </p>
+    <p><strong>Risposta:</strong> 
+      <span id="risposta1" style="display:none;"></span>%
+    </p>
+    <button onclick="mostraRisposta1()" id="bottoneRisposta1">Mostra risposta</button>
+    <button onclick="generaEsercizio1()">Nuovo esercizio</button>
+  </div>
+
+  <!-- SECONDA CARD: Percentile (più basso, più alto, centrale) -->
+  <div class="card">
+    <h2>Esercizio: Percentile QI</h2>
+    <p id="traccia2"></p>
+    <p><strong>Risposta:</strong> 
+      <span id="risposta2" style="display:none;"></span>
+    </p>
+    <button onclick="mostraRisposta2()" id="bottoneRisposta2">Mostra risposta</button>
+    <button onclick="generaEsercizio2()">Nuovo esercizio</button>
+  </div>
+
+  <script>
+    // ----------- Funzioni codice1 -----------
+    function normalCDF(z) {
+      return (1.0 + erf(z / Math.sqrt(2))) / 2;
+    }
+
+    function erf(x) {
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const a1 =  0.254829592, a2 = -0.284496736, a3 =  1.421413741;
+      const a4 = -1.453152027, a5 =  1.061405429, p  =  0.3275911;
+      const t = 1 / (1 + p * x);
+      const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
+      return sign * y;
+    }
+
+    function mostraRisposta1() {
+      document.getElementById("risposta1").style.display = "inline";
+      document.getElementById("bottoneRisposta1").style.display = "none";
+    }
+
+    function generaEsercizio1() {
+      const mu = Math.floor(Math.random() * (110 - 90 + 1)) + 90;
+      const sigma = Math.floor(Math.random() * (16 - 11 + 1)) + 11;
+      const qi = Math.floor(Math.random() * 41) + 90;
+      const direzioni = ["inferiore", "superiore"];
+      const scelta = direzioni[Math.floor(Math.random() * direzioni.length)];
+      const z = (qi - mu) / sigma;
+      let percentuale;
+      if (scelta === "inferiore") {
+        percentuale = (normalCDF(z) * 100).toFixed(2);
+      } else {
+        percentuale = ((1 - normalCDF(z)) * 100).toFixed(2);
+      }
+      document.getElementById("media1").textContent = mu;
+      document.getElementById("deviazione1").textContent = sigma;
+      document.getElementById("qi1").textContent = qi;
+      document.getElementById("direzione1").textContent = scelta;
+      document.getElementById("risposta1").textContent = percentuale;
+      document.getElementById("risposta1").style.display = "none";
+      document.getElementById("bottoneRisposta1").style.display = "inline-block";
+    }
+
+    // ----------- Funzioni codice2 -----------
+    function invNorm(p) {
+      const a1 = -39.696830, a2 = 220.946098, a3 = -275.928510, a4 = 138.357751, a5 = -30.664798, a6 = 2.506628;
+      const b1 = -54.476098, b2 = 161.585836, b3 = -155.698979, b4 = 66.801311, b5 = -13.280681;
+      const c1 = -0.007784894, c2 = -0.322396, c3 = -2.400758, c4 = -2.549732, c5 = 4.374664, c6 = 2.938163;
+      const d1 = 0.007784695, d2 = 0.322467, d3 = 2.445134, d4 = 3.754408;
+      let q, r;
+      if (p < 0.02425) {
+        q = Math.sqrt(-2 * Math.log(p));
+        return (((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6) / ((((d1*q+d2)*q+d3)*q+d4)*q+1);
+      } else if (p > 1 - 0.02425) {
+        q = Math.sqrt(-2 * Math.log(1 - p));
+        return -(((((c1*q+c2)*q+c3)*q+c4)*q+c5)*q+c6) / ((((d1*q+d2)*q+d3)*q+d4)*q+1);
+      } else {
+        q = p - 0.5;
+        r = q * q;
+        return (((((a1*r+a2)*r+a3)*r+a4)*r+a5)*r+a6)*q / (((((b1*r+b2)*r+b3)*r+b4)*r+b5)*r+1);
+      }
+    }
+
+    function mostraRisposta2() {
+      document.getElementById("risposta2").style.display = "inline";
+      document.getElementById("bottoneRisposta2").style.display = "none";
+    }
+
+    function generaEsercizio2() {
+      const mu = Math.floor(Math.random() * (110 - 90 + 1)) + 90;
+      const sigma = Math.floor(Math.random() * (16 - 11 + 1)) + 11;
+      const tipi = ["basso", "alto", "centrale"];
+      const tipo = tipi[Math.floor(Math.random() * tipi.length)];
+      const traccia = document.getElementById("traccia2");
+      const risposta = document.getElementById("risposta2");
+
+      if (tipo === "centrale") {
+        const centrali = [60, 68, 70, 72, 80, 90];
+        const percentuale = centrali[Math.floor(Math.random() * centrali.length)];
+        const p = percentuale / 100;
+        const zInf = invNorm((1 - p) / 2);
+        const zSup = invNorm(1 - (1 - p) / 2);
+        const qi1 = (mu + zInf * sigma).toFixed(2);
+        const qi2 = (mu + zSup * sigma).toFixed(2);
+        traccia.innerHTML = `
+          Il QI in una popolazione è distribuito normalmente con<br>
+          <strong>media μ = ${mu}</strong> e <strong>deviazione standard σ = ${sigma}</strong>.<br><br>
+          Quali sono i <strong>valori di QI</strong> che delimitano il <strong>${percentuale}% centrale</strong> della popolazione?
+        `;
+        risposta.innerHTML = `Intervallo centrale: da ${qi1} a ${qi2}`;
+      } else {
+        const percentuali = [5, 10, 12, 15, 20, 25];
+        const p = percentuali[Math.floor(Math.random() * percentuali.length)];
+        const pDecimal = p / 100;
+        const z = tipo === "basso" ? invNorm(pDecimal) : invNorm(1 - pDecimal);
+        const qi = (mu + z * sigma).toFixed(2);
+        traccia.innerHTML = `
+          Il QI in una popolazione è distribuito normalmente con<br>
+          <strong>media μ = ${mu}</strong> e <strong>deviazione standard σ = ${sigma}</strong>.<br><br>
+          Quale dovrebbe essere il QI <strong>${tipo === "basso" ? "massimo" : "minimo"}</strong>
+          per rientrare nel <strong>${p}% più ${tipo}</strong> della popolazione?
+        `;
+        risposta.innerHTML = `QI ${tipo === "basso" ? "massimo" : "minimo"} ≈ ${qi}`;
+      }
+
+      risposta.style.display = "none";
+      document.getElementById("bottoneRisposta2").style.display = "inline-block";
+    }
+
+    // Inizializza entrambi gli esercizi
+    window.onload = function() {
+      generaEsercizio1();
+      generaEsercizio2();
+    };
+  </script>
+
+</body>
+</html>
